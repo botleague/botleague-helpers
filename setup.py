@@ -16,9 +16,9 @@ with open(abspath(join(dirname(__file__), 'README.md')), 'rb') as readme_file:
     __readme__ = readme_file.read().decode('utf-8')
 
 setup(
-    name='gcp-helpers',
+    name='botleague-helpers',
     version='0.0.1',
-    description='Helpers for Google Cloud Platform',
+    description='Helpers for Bot League',
     long_description=__readme__,
     long_description_content_type='text/markdown',
     classifiers=[
@@ -26,12 +26,12 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Environment :: Console'
     ],
-    keywords='botleague gcp',
-    url='http://github.com/botleague/botleague_gcp',
+    keywords='botleague',
+    url='http://github.com/deepdrive/botleague-helpers',
     author='Craig Quiter',
     author_email='craig@deepdrive.io',
     license='MIT',
-    packages=['gcp_helpers'],
+    packages=['botleague_helpers'],
     zip_safe=True,
     python_requires='>=3.7',
     install_requires=get_requires()

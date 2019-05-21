@@ -1,9 +1,17 @@
 from __future__ import print_function
 
-import gcp_helpers.constants as c
+import botleague_helpers.constants as c
+
+
+DEFAULT_COLLECTION_NAME = 'simple_key_value_store'
 
 
 class SimpleKeyValueStore:
+    collection_name: str
+
+    def __init__(self, collection_name):
+        self.collection_name = collection_name
+
     def get(self, key):
         raise NotImplementedError()
 
@@ -12,8 +20,8 @@ class SimpleKeyValueStore:
 
 
 class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
-    def __init__(self):
-        self.collection_name = 'simple_key_value_store'
+    def __init__(self, collection_name=DEFAULT_COLLECTION_NAME):
+        super().__init__(collection_name)
         from firebase_admin import firestore
         self.kv = firestore.client().collection(self.collection_name)
 
@@ -26,7 +34,8 @@ class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
 
 
 class SimpleKeyValueStoreLocal(SimpleKeyValueStore):
-    def __init__(self):
+    def __init__(self, collection_name=DEFAULT_COLLECTION_NAME):
+        super().__init__(collection_name)
         self.kv = {}
 
     def get(self, key):
