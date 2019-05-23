@@ -24,9 +24,13 @@ if SHOULD_USE_FIRESTORE:
         raise RuntimeError(
             'Could not initialize firestore, set SHOULD_USE_FIRESTORE=false'
             ' locally to use temp storage.')
-    log.info('Obtaining secrets from Firestore')
+    log.info('Obtaining secrets from Firestore...')
     SECRETS = firestore.client().collection('secrets')
-    GITHUB_TOKEN = SECRETS.document(TOKEN_NAME).get().to_dict()['token']
+    if TOKEN_NAME in os.environ:
+        GITHUB_TOKEN = os.environ[TOKEN_NAME]
+    else:
+        GITHUB_TOKEN = SECRETS.document(TOKEN_NAME).get().to_dict()['token']
+    log.info('Secrets loaded')
 else:
     # We want botleague_gcp to be extractable as a standalone module,
     # so don't import leaderboard_generator.config
