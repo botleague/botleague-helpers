@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-import botleague_helpers.constants as c
+from botleague_helpers.config import c
+from botleague_helpers.config import get_test_name_from_callstack
 
 
 class SimpleKeyValueStore:
@@ -46,7 +47,13 @@ class SimpleKeyValueStoreLocal(SimpleKeyValueStore):
 
 
 def get_key_value_store() -> SimpleKeyValueStore:
-    if c.SHOULD_USE_FIRESTORE:
+    test_name = get_test_name_from_callstack()
+    if test_name:
+        print('We are in a test, %s, so not using Firestore' % test_name)
+        return SimpleKeyValueStoreLocal()
+    elif c.should_use_firestore:
+        print('Using Firestore backed key value store')
         return SimpleKeyValueStoreFirestore()
     else:
+        print('SHOULD_USE_FIRESTORE is false, so not using Firestore')
         return SimpleKeyValueStoreLocal()
