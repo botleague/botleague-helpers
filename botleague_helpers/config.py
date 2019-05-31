@@ -74,4 +74,4 @@ if 'GITHUB_DEBUG' in os.environ:
     github.enable_console_debug_logging()
 
 
-c = Config()
+blconfig = Config()
