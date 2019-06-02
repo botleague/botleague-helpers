@@ -22,18 +22,23 @@ class Config:
         test_name = get_test_name_from_callstack()
         if test_name:
             print('In test %s so returning "" for github token' % test_name)
+            self.is_test = True
             ret = ''
         elif self.is_test:
             print('IS_TEST is set, so returning "" for github token')
             ret = ''
         elif self.token_name in os.environ:
+            # We're not in a test and have not set the token, set from env
             print('Found %s in environment' % self.token_name)
             ret = os.environ[self.token_name]
         elif not self.should_use_firestore:
+            # We're not in a test, but the env has dictated not to use Firestore
             print('SHOULD_USE_FIRESTORE is false, so returning "" '
                   'for github token')
             ret = ''
         elif self._github_token is None:
+            # We're not in a test and have not set the token, fetch from
+            # Firestore
             self._ensure_firebase_initialized()
             from firebase_admin import firestore
             print('Obtaining secrets from Firestore...')
@@ -41,6 +46,7 @@ class Config:
             ret = secrets.document(self.token_name).get().\
                 to_dict()['token']
         else:
+            # We're not in a test and have already set the token
             ret = self._github_token
         self._github_token = ret
         return ret
@@ -66,7 +72,7 @@ def get_test_name_from_callstack() -> str:
         test_prefix = 'test_'
         if fn.startswith(test_prefix):
             test_name = fn[len(test_prefix):]
-            ret = test_name
+            return test_name
     return ret
 
 
@@ -75,3 +81,12 @@ if 'GITHUB_DEBUG' in os.environ:
 
 
 blconfig = Config()
+
+
+def activate_test_mode():
+    blconfig.is_test = True
+    disable_firestore_access()
+
+
+def disable_firestore_access():
+    blconfig.should_use_firestore = False
