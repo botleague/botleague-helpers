@@ -81,3 +81,12 @@ if 'GITHUB_DEBUG' in os.environ:
 
 
 blconfig = Config()
+
+
+def activate_test_mode():
+    blconfig.is_test = True
+    disable_firestore_access()
+
+
+def disable_firestore_access():
+    blconfig.should_use_firestore = False
