@@ -72,7 +72,7 @@ def get_test_name_from_callstack() -> str:
         test_prefix = 'test_'
         if fn.startswith(test_prefix):
             test_name = fn[len(test_prefix):]
-            ret = test_name
+            return test_name
     return ret
 
 
