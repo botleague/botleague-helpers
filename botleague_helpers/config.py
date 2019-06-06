@@ -22,6 +22,7 @@ class Config:
         test_name = get_test_name_from_callstack()
         if test_name:
             print('In test %s so returning "" for github token' % test_name)
+            self.is_test = True
             ret = ''
         elif self.is_test:
             print('IS_TEST is set, so returning "" for github token')
