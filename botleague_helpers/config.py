@@ -28,13 +28,17 @@ class Config:
             print('IS_TEST is set, so returning "" for github token')
             ret = ''
         elif self.token_name in os.environ:
+            # We're not in a test and have not set the token, set from env
             print('Found %s in environment' % self.token_name)
             ret = os.environ[self.token_name]
         elif not self.should_use_firestore:
+            # We're not in a test, but the env has dictated not to use Firestore
             print('SHOULD_USE_FIRESTORE is false, so returning "" '
                   'for github token')
             ret = ''
         elif self._github_token is None:
+            # We're not in a test and have not set the token, fetch from
+            # Firestore
             self._ensure_firebase_initialized()
             from firebase_admin import firestore
             print('Obtaining secrets from Firestore...')
@@ -42,6 +46,7 @@ class Config:
             ret = secrets.document(self.token_name).get().\
                 to_dict()['token']
         else:
+            # We're not in a test and have already set the token
             ret = self._github_token
         self._github_token = ret
         return ret
