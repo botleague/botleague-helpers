@@ -22,8 +22,9 @@ class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
 
     def get(self, key):
         value = self.kv.document(key).get().to_dict()
-        if key in value and len(value) == 1:
-            # Value is just a field
+        if value is not None and key in value and len(value) == 1:
+            # Document just contains the one field with the same name
+            # as the document, so just return the value of the field.
             value = value[key]
         return value
 
