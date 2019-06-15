@@ -17,6 +17,7 @@ class SimpleKeyValueStore:
 class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
     def __init__(self):
         from firebase_admin import firestore
+        blconfig.ensure_firebase_initialized()
         self.kv = firestore.client().collection(self.collection_name)
 
     def get(self, key):

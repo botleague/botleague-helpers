@@ -39,7 +39,7 @@ class Config:
         elif self._github_token is None:
             # We're not in a test and have not set the token, fetch from
             # Firestore
-            self._ensure_firebase_initialized()
+            self.ensure_firebase_initialized()
             from firebase_admin import firestore
             print('Obtaining secrets from Firestore...')
             secrets = firestore.client().collection('secrets')
@@ -51,7 +51,7 @@ class Config:
         self._github_token = ret
         return ret
 
-    def _ensure_firebase_initialized(self):
+    def ensure_firebase_initialized(self):
         if not self._firebase_initialized:
             import firebase_admin
 
