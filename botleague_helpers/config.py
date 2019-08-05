@@ -76,6 +76,8 @@ def get_test_name_from_callstack() -> str:
     return ret
 
 
+in_test = get_test_name_from_callstack
+
 if 'GITHUB_DEBUG' in os.environ:
     github.enable_console_debug_logging()
 
