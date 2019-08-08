@@ -14,7 +14,7 @@ from google.cloud import firestore
 DEFAULT_COLLECTION = 'simple_key_value_store'
 
 
-class SimpleKeyValueStore:
+class DB:
     db = None
     collection = None
 
@@ -70,7 +70,7 @@ class SimpleKeyValueStore:
         return ret
 
 
-class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
+class DBFirestore(DB):
     def __init__(self, collection_name, use_boxes):
         super().__init__(collection_name, use_boxes)
         from firebase_admin import firestore
@@ -143,6 +143,8 @@ class SimpleKeyValueStoreFirestore(SimpleKeyValueStore):
 
 
 def delete_firestore_collection(coll_ref, batch_size=10):
+    # WARNING: Only do this for test data!
+    # c.f. https://firebase.google.com/docs/firestore/solutions/delete-collections
     docs = coll_ref.limit(batch_size).get()
     deleted = 0
 
@@ -151,13 +153,13 @@ def delete_firestore_collection(coll_ref, batch_size=10):
         doc.reference.delete()
         deleted = deleted + 1
     if deleted >= batch_size:
-        return delete_collection(coll_ref, batch_size)
+        return delete_firestore_collection(coll_ref, batch_size)
 
 
 LOCAL_COLLECTIONS = {}
 
 
-class SimpleKeyValueStoreLocal(SimpleKeyValueStore):
+class DBLocal(DB):
     def __init__(self, collection_name, use_boxes):
         super().__init__(collection_name, use_boxes)
         self.collection = LOCAL_COLLECTIONS.setdefault(collection_name, {})
@@ -182,13 +184,12 @@ class SimpleKeyValueStoreLocal(SimpleKeyValueStore):
             del LOCAL_COLLECTIONS[key]
 
 
-def get_key_value_store(
-        collection_name: str = DEFAULT_COLLECTION,
-        force_firestore_db=False,
-        use_boxes=False) -> SimpleKeyValueStore:
+def get_db(collection_name: str = DEFAULT_COLLECTION,
+           force_firestore_db=False,
+           use_boxes=False) -> DB:
     """
 
-    :param collection_name: Namespace for your kv store
+    :param collection_name: Namespace for your db
     :param test_remote_db: For special cases where you want to test the db logic
     :param use_boxes: Return python-box objects instead of dicts / lists
     :return:
@@ -196,10 +197,10 @@ def get_key_value_store(
     test_name = get_test_name_from_callstack()
     if test_name and not force_firestore_db:
         print('We are in a test, %s, so not using Firestore' % test_name)
-        return SimpleKeyValueStoreLocal(collection_name, use_boxes)
+        return DBLocal(collection_name, use_boxes)
     elif blconfig.should_use_firestore:
         print('Using Firestore backed key value store')
-        return SimpleKeyValueStoreFirestore(collection_name, use_boxes)
+        return DBFirestore(collection_name, use_boxes)
     else:
         print('SHOULD_USE_FIRESTORE is false, so not using Firestore')
-        return SimpleKeyValueStoreLocal(collection_name, use_boxes)
+        return DBLocal(collection_name, use_boxes)
