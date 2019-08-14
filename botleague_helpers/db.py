@@ -24,11 +24,11 @@ class DB:
 
     def get(self, key):
         ret = self._get(key)
-        ret = self._to_box(ret)
+        ret = self._deserialize(ret)
         return ret
 
     def set(self, key, value):
-        value = self._from_box(value)
+        value = self._serialize(value)
         self._set(key, value)
 
     def compare_and_swap(self, key, expected_current_value, new_value) -> bool:
@@ -37,9 +37,16 @@ class DB:
         expected value.
         https://en.wikipedia.org/wiki/Compare-and-swap
         """
-        new_value = self._from_box(new_value)
-        expected_current_value = self._from_box(expected_current_value)
+        new_value = self._serialize(new_value)
+        expected_current_value = self._serialize(expected_current_value)
         return self._compare_and_swap(key, expected_current_value, new_value)
+
+    def where(self, *args):
+        for item in self._where(*args):
+            yield self._deserialize(item)
+
+    def _where(self, *args):
+        raise NotImplementedError()
 
     def delete_all_test_data(self):
         raise NotImplementedError()
@@ -53,7 +60,7 @@ class DB:
     def _set(self, key, value):
         raise NotImplementedError()
 
-    def _from_box(self, value):
+    def _serialize(self, value):
         if self.use_boxes:
             if isinstance(value, BoxList):
                 value = value.to_list()
@@ -61,7 +68,7 @@ class DB:
                 value = value.to_dict()
         return value
 
-    def _to_box(self, ret):
+    def _deserialize(self, ret):
         if self.use_boxes:
             if isinstance(ret, list):
                 ret = BoxList(ret)
@@ -82,6 +89,12 @@ class DBFirestore(DB):
         value = self.collection.document(key).get().to_dict() or {}
         value = self._simplify_value(key, value)
         return value
+
+    def _where(self, *args):
+        query = self.collection.where(*args)
+        for item in query.stream():
+            ret = self._deserialize(item.to_dict() or {})
+            yield ret
 
     @staticmethod
     def _simplify_value(key, value):
@@ -186,7 +199,7 @@ class DBLocal(DB):
 
 def get_db(collection_name: str = DEFAULT_COLLECTION,
            force_firestore_db=False,
-           use_boxes=False) -> DB:
+           use_boxes=True) -> DB:
     """
 
     :param collection_name: Namespace for your db
