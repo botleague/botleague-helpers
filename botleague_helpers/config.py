@@ -11,6 +11,7 @@ class Config:
     is_test = 'IS_TEST' in os.environ
     should_gen_key = 'should_gen_leaderboard'
     token_name = 'LEADERBOARD_GITHUB_TOKEN'
+    botleague_collection_name = 'botleague'
 
     # Properties that will change during tests
     # --------------------------------------------------------------------------

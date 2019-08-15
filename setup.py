@@ -17,7 +17,7 @@ with open(abspath(join(dirname(__file__), 'README.md')), 'rb') as readme_file:
 
 setup(
     name='botleague-helpers',
-    version='0.1.0',
+    version='0.1.1',
     description='Helpers for BotLeague',
     long_description=__readme__,
     long_description_content_type='text/markdown',
