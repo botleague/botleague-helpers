@@ -4,6 +4,8 @@ from typing import List
 
 from setuptools import setup
 
+from botleague_helpers import VERSION
+
 
 def get_requires() -> List[str]:
     with open('requirements.txt') as reqs_file:
@@ -17,7 +19,7 @@ with open(abspath(join(dirname(__file__), 'README.md')), 'rb') as readme_file:
 
 setup(
     name='botleague-helpers',
-    version='0.1.1',
+    version=VERSION,
     description='Helpers for BotLeague',
     long_description=__readme__,
     long_description_content_type='text/markdown',

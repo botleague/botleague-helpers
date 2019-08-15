@@ -2,6 +2,7 @@ import inspect
 import os
 
 import github
+from botleague_helpers import VERSION
 
 
 class Config:
@@ -12,6 +13,7 @@ class Config:
     should_gen_key = 'should_gen_leaderboard'
     token_name = 'LEADERBOARD_GITHUB_TOKEN'
     botleague_collection_name = 'botleague'
+    version = VERSION
 
     # Properties that will change during tests
     # --------------------------------------------------------------------------
