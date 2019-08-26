@@ -29,7 +29,7 @@ class DB:
 
     def set(self, key, value) -> Any:
         value = self._serialize(value)
-        self._set(key, value)
+        return self._set(key, value)
 
     def compare_and_swap(self, key, expected_current_value, new_value) -> bool:
         """
@@ -57,7 +57,7 @@ class DB:
     def _get(self, key) -> Any:
         raise NotImplementedError()
 
-    def _set(self, key, value):
+    def _set(self, key, value) -> Any:
         raise NotImplementedError()
 
     def _serialize(self, value):
@@ -106,7 +106,7 @@ class DBFirestore(DB):
 
     def _set(self, key, value):
         value = self._expand_value(key, value)
-        self.collection.document(key).set(value)
+        return self.collection.document(key).set(value)
 
     @staticmethod
     def _expand_value(key, value) -> Any:
@@ -182,6 +182,7 @@ class DBLocal(DB):
 
     def _set(self, key, value):
         self.collection[key] = value
+        return value
 
     def _compare_and_swap(self, key, expected_current_value, new_value) -> bool:
         # Not threadsafe!
