@@ -3,6 +3,7 @@ import os
 
 import github
 from botleague_helpers import VERSION
+from botleague_helpers.crypto import decrypt_symmetric
 
 
 class Config:
@@ -11,7 +12,7 @@ class Config:
         'SHOULD_USE_FIRESTORE', 'true') == 'true'
     is_test = 'IS_TEST' in os.environ
     should_gen_key = 'should_gen_leaderboard'
-    token_name = 'LEADERBOARD_GITHUB_TOKEN'
+    token_name = 'LEADERBOARD_GITHUB_TOKEN_encrypted'
     botleague_collection_name = 'botleague'
     version = VERSION
 
@@ -46,8 +47,8 @@ class Config:
             from firebase_admin import firestore
             print('Obtaining secrets from Firestore...')
             secrets = firestore.client().collection('secrets')
-            ret = secrets.document(self.token_name).get().\
-                to_dict()['token']
+            ret = decrypt_symmetric(secrets.document(self.token_name).get().
+                                    to_dict()['token'])
         else:
             # We're not in a test and have already set the token
             ret = self._github_token
