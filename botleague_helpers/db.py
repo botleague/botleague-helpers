@@ -22,12 +22,12 @@ class DB:
         self.collection_name = collection_name or DEFAULT_COLLECTION
         self.use_boxes = use_boxes
 
-    def get(self, key):
+    def get(self, key) -> Any:
         ret = self._get(key)
         ret = self._deserialize(ret)
         return ret
 
-    def set(self, key, value):
+    def set(self, key, value) -> Any:
         value = self._serialize(value)
         self._set(key, value)
 
@@ -54,7 +54,7 @@ class DB:
     def _compare_and_swap(self, key, expected_current_value, new_value) -> bool:
         raise NotImplementedError()
 
-    def _get(self, key):
+    def _get(self, key) -> Any:
         raise NotImplementedError()
 
     def _set(self, key, value):
