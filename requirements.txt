@@ -8,3 +8,5 @@ google-cloud-logging
 pytest>=4.4.1
 PyGithub>=1.43.6
 python-box
+loguru
+google-cloud-kms
