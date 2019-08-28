@@ -1,6 +1,6 @@
 import os
 from os.path import abspath, dirname, join
-from typing import List
+from typing import List, Tuple
 
 from setuptools import setup
 
