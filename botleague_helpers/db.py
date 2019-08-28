@@ -204,7 +204,7 @@ def get_db(collection_name: str = DEFAULT_COLLECTION,
     """
 
     :param collection_name: Namespace for your db
-    :param test_remote_db: For special cases where you want to test the db logic
+    :param force_firestore_db: Use the remote Firestore db even in tests
     :param use_boxes: Return python-box objects instead of dicts / lists
     :return:
     """
