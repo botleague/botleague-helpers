@@ -51,3 +51,8 @@ def decrypt_symmetric(ciphertext, project_id='silken-impulse-217423',
     response = client.decrypt(name, ciphertext)
     ret = response.plaintext.decode()
     return ret
+
+
+if __name__ == '__main__':
+    from botleague_helpers.db import get_db
+    encrypt_db_key(get_db('secrets'), 'DEEPDRIVE_DOCKER_CREDS')
