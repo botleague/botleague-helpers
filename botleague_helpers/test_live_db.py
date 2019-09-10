@@ -1,7 +1,11 @@
 import random
 import string
+import sys
+
+from loguru import logger as log
 
 from botleague_helpers.db import get_db
+from botleague_helpers import fan_in
 
 TEST_DB_NAME = 'test_db_delete_me'
 
@@ -18,6 +22,34 @@ def test_compare_and_set_live_db():
 def test_namespace_live_db():
     rand_str_get_set(collection_name='')
     rand_str_get_set(collection_name=TEST_DB_NAME)
+
+
+def test_fan_in():
+    test_id = ''.join(
+        random.choice(string.ascii_lowercase + string.digits)
+        for _ in range(32))
+    db_name = f'test_data_fan_in_can_delete_{test_id}'
+    db = get_db(db_name, force_firestore_db=True)
+    fan_in.create_fan_in(test_id, db=db)
+    a = True
+    b = False
+    def ready_fn():
+        return a and b
+    def reduce_fn():
+        return 'asdf'
+
+    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    assert not result
+    db.set(test_id, fan_in.REVIEWING)
+    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    assert not result
+    db.set(test_id, fan_in.WAITING)
+    b = True
+    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    assert result.reduce_result == 'asdf'
+    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    assert not result
+
 
 
 def watch_collection_play():
@@ -55,9 +87,31 @@ def rand_str_get_set(collection_name):
     db.delete_all_test_data()
 
 
+def run_all(current_module):
+    log.info('Running all tests')
+    num = 0
+    for attr in dir(current_module):
+        if attr.startswith('test_'):
+            num += 1
+            log.info('Running ' + attr)
+            getattr(current_module, attr)()
+            log.success(f'Test: {attr} ran successfully')
+    return num
+
+
+def main():
+    test_module = sys.modules[__name__]
+    if len(sys.argv) > 1:
+        test_case = sys.argv[1]
+        log.info('Running ' + test_case)
+        getattr(test_module, test_case)()
+        num = 1
+        log.success(f'{test_case} ran successfully!')
+    else:
+        num = run_all(test_module)
+    log.success(f'{num} tests ran successfully!')
+
+
 if __name__ == '__main__':
-    test_compare_and_set_live_db()
-    test_namespace_live_db()
-    # watch_collection_play()
+    main()
     # TODO: Put test data in a separate project
-    # TODO: Clean things up, very carefully
