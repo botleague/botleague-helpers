@@ -5,7 +5,7 @@ import sys
 from loguru import logger as log
 
 from botleague_helpers.db import get_db
-from botleague_helpers import fan_in
+from botleague_helpers import reduce
 
 TEST_DB_NAME = 'test_db_delete_me'
 
@@ -24,13 +24,13 @@ def test_namespace_live_db():
     rand_str_get_set(collection_name=TEST_DB_NAME)
 
 
-def test_fan_in():
+def test_reduce():
     test_id = ''.join(
         random.choice(string.ascii_lowercase + string.digits)
         for _ in range(32))
-    db_name = f'test_data_fan_in_can_delete_{test_id}'
+    db_name = f'test_data_reduce_can_delete_{test_id}'
     db = get_db(db_name, force_firestore_db=True)
-    fan_in.create_fan_in(test_id, db=db)
+    reduce.create_reduce(test_id, db=db)
     a = True
     b = False
     def ready_fn():
@@ -38,18 +38,18 @@ def test_fan_in():
     def reduce_fn():
         return 'asdf'
 
-    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
-    db.set(test_id, fan_in.REVIEWING)
-    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    db.set(test_id, reduce.REVIEWING)
+    result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
-    db.set(test_id, fan_in.WAITING)
+    db.set(test_id, reduce.WAITING)
     b = True
-    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert result.reduce_result == 'asdf'
-    result = fan_in.fan_in(test_id, ready_fn, reduce_fn, db, max_attempts=1)
+    result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
-
+    db.delete_all_test_data()
 
 
 def watch_collection_play():
