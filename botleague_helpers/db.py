@@ -39,6 +39,8 @@ class DB:
         expected_current_value = self._serialize(expected_current_value)
         return self._compare_and_swap(key, expected_current_value, new_value)
 
+    cas = compare_and_swap
+
     def where(self, *args):
         for item in self._where(*args):
             yield self._deserialize(item)
