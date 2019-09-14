@@ -1,7 +1,8 @@
 from box import Box
 from typing import List, Union
-
 import time
+
+from loguru import logger as log
 
 from botleague_helpers.db import get_db
 
