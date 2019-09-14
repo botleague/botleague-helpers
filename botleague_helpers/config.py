@@ -45,7 +45,6 @@ class Config:
             # Firestore
             self.ensure_firebase_initialized()
             from firebase_admin import firestore
-            print('Obtaining secrets from Firestore...')
             secrets = firestore.client().collection('secrets')
             ret = decrypt_symmetric(secrets.document(self.token_name).get().
                                     to_dict()['token'])

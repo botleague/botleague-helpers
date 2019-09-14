@@ -213,7 +213,6 @@ def get_db(collection_name: str = DEFAULT_COLLECTION,
         print('We are in a test, %s, so not using Firestore' % test_name)
         return DBLocal(collection_name, use_boxes)
     elif blconfig.should_use_firestore:
-        print('Using Firestore backed key value store')
         return DBFirestore(collection_name, use_boxes)
     else:
         print('SHOULD_USE_FIRESTORE is false, so not using Firestore')
