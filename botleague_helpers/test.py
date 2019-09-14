@@ -40,15 +40,24 @@ def test_reduce():
 
     result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
+
+    # Wait for other reviewer
     db.set(test_id, reduce.REVIEWING)
     result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
+    assert db.get(test_id) == reduce.REVIEWING
+
+    # Reduce
     db.set(test_id, reduce.WAITING)
     b = True
     result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert result.reduce_result == 'asdf'
+    assert db.get(test_id) == reduce.FINISHED
+
+    # Don't allow double reduce
     result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
     assert not result
+    assert db.get(test_id) == reduce.FINISHED
     db.delete_all_test_data()
 
 
