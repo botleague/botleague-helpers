@@ -48,15 +48,19 @@ def try_reduce_async(reduce_id: str, ready_fn: callable, reduce_fn: callable,
 
     attempts = 0
 
+    def should_wait():
+        # For testing only
+        return max_attempts == -1 or attempts < max_attempts
+
     # CAS that we are reviewing to prevent other reviewers
-    while not become_reviewer() and (max_attempts == -1 or
-                                     attempts < max_attempts):
+    while not become_reviewer():
         # Note: max attempts is just for testing.
 
         # If CAS fails, wait for other reviewer finish
         time.sleep(0.1)
         attempts += 1
-        if attempts >= max_attempts:
+        if not should_wait():
+            log.warning('Not waiting to become reviewer')
             return False
 
     # We are reviewer, check to make sure previous reviewers did not finish
