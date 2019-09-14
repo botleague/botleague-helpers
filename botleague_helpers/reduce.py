@@ -37,7 +37,7 @@ def try_reduce_async(reduce_id: str, ready_fn: callable, reduce_fn: callable,
 
     def become_reviewer():
         waiting = db.compare_and_swap(reduce_id, WAITING, REVIEWING)
-        finished = db.compare_and_swap(reduce_id, FINISHED, REVIEWING)
+        finished = db.compare_and_swap(reduce_id, FINISHED, FINISHED)
         return waiting or finished
 
     # If not complete, become reviewer and mark complete or not
