@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import sys
-from typing import Any
+from typing import Any, Generator
 
 from box import BoxList, Box
 
@@ -41,7 +41,7 @@ class DB:
 
     cas = compare_and_swap
 
-    def where(self, *args):
+    def where(self, *args) -> Generator:
         for item in self._where(*args):
             yield self._deserialize(item)
 
