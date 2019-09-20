@@ -1,3 +1,4 @@
+from box import Box
 from loguru import logger as log
 
 
@@ -12,6 +13,15 @@ def encrypt_db_key(db, key):
     else:
         db.set(new_key, encrypt_symmetric(unencrypted_value))
     log.warning(f'Be sure to delete your old plaintext values at {key}')
+
+
+def decrypt_db_key(db, key):
+    encrypted_value = db.get(key)
+    if isinstance(encrypted_value, Box):
+        if 'token' in encrypted_value:
+            encrypted_value = encrypted_value.token
+    ret = decrypt_symmetric(encrypted_value)
+    return ret
 
 
 def encrypt_symmetric(plaintext, project_id='silken-impulse-217423',
@@ -55,4 +65,5 @@ def decrypt_symmetric(ciphertext, project_id='silken-impulse-217423',
 
 if __name__ == '__main__':
     from botleague_helpers.db import get_db
-    encrypt_db_key(get_db('secrets'), 'DEEPDRIVE_DOCKER_CREDS')
+    print(decrypt_db_key(get_db('secrets'), 'LEADERBOARD_GITHUB_TOKEN_encrypted'))
+    # encrypt_db_key(get_db('secrets'), 'DEEPDRIVE_DOCKER_CREDS')
