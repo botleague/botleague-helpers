@@ -1,21 +1,29 @@
+import sys
+
 from box import Box
 from loguru import logger as log
 
+POSTFIX = '_encrypted'
+DEFAULT_DB_NAME = 'secrets'
 
-def encrypt_db_key(db, key):
-    unencrypted_value = db.get(key)
-    new_key = f'{key}_encrypted'
+def encrypt_db_key(unencrypted_value, key, db=None):
+    from botleague_helpers.db import get_db
+    db = db or get_db(DEFAULT_DB_NAME)
+    key = f'{key}{POSTFIX}'
     if isinstance(unencrypted_value, dict):
         encrypted_value = dict()
         for k, v in unencrypted_value.items():
             encrypted_value[k] = encrypt_symmetric(v)
-        db.set(new_key, encrypted_value)
+        db.set(key, encrypted_value)
     else:
-        db.set(new_key, encrypt_symmetric(unencrypted_value))
-    log.warning(f'Be sure to delete your old plaintext values at {key}')
+        db.set(key, encrypt_symmetric(unencrypted_value))
 
 
-def decrypt_db_key(db, key):
+def decrypt_db_key(key, db=None):
+    from botleague_helpers.db import get_db
+    db = db or get_db(DEFAULT_DB_NAME)
+    if not key.endswith(POSTFIX):
+        key = f'{key}{POSTFIX}'
     encrypted_value = db.get(key)
     if isinstance(encrypted_value, Box):
         if 'token' in encrypted_value:
@@ -63,7 +71,20 @@ def decrypt_symmetric(ciphertext, project_id='silken-impulse-217423',
     return ret
 
 
+def main():
+    if '--decrypt' in sys.argv:
+        name = sys.argv[-1]
+        print(decrypt_db_key(name))
+    elif '--encrypt' in sys.argv:
+        name = sys.argv[-2]
+        value = sys.argv[-1]
+        encrypt_db_key(value, name)
+
+
+# Usage
+# Decrypt:
+#   python crypto.py --decrypt MYSECRETNAME
+# Encrypt:
+#   python crypto.py --encrypt NEW_NAME MYVALUE
 if __name__ == '__main__':
-    from botleague_helpers.db import get_db
-    print(decrypt_db_key(get_db('secrets'), 'LEADERBOARD_GITHUB_TOKEN_encrypted'))
-    # encrypt_db_key(get_db('secrets'), 'DEEPDRIVE_DOCKER_CREDS')
+    main()
