@@ -10,3 +10,4 @@ PyGithub>=1.43.6
 python-box
 loguru
 google-cloud-kms
+slackclient
