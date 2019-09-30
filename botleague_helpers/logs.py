@@ -2,7 +2,9 @@ import time
 from collections import defaultdict
 
 from botleague_helpers.config import in_test
+from botleague_helpers.crypto import decrypt_db_key
 from google.cloud import logging as gcloud_logging
+import slack
 
 stackdriver_client = gcloud_logging.Client()
 
@@ -83,9 +85,6 @@ class SlackMsgHash:
     count: int = 0
 
 def add_slack_error_sink(loguru_logger, channel):
-    import slack
-    from botleague_helpers.crypto import decrypt_db_key
-
     client = slack.WebClient(token=decrypt_db_key('SLACK_ERROR_BOT_TOKEN'))
 
     msg_hashes = defaultdict(SlackMsgHash)
