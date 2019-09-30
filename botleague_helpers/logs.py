@@ -102,7 +102,6 @@ def add_slack_error_sink(loguru_logger, channel):
             response = client.chat_postMessage(channel=channel,
                                                text=message_plus_count)
             msg_hashes[msg_hash].last_notified = time.time()
-            msg_hashes[msg_hash].count += 1
             # assert response["ok"]
             # assert response["message"]["text"] == message
 
@@ -115,5 +114,7 @@ def add_slack_error_sink(loguru_logger, channel):
                     send_message()
             else:
                 send_message()
+
+            msg_hashes[msg_hash].count += 1
 
     loguru_logger.add(sink)
