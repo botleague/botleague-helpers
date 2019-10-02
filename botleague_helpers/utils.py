@@ -122,5 +122,32 @@ def is_json(string: str):
 def box2json(box: Box):
     return box.to_json(indent=2, default=str)
 
-# if __name__ == '__main__':
-#     trigger_leaderboard_generation()
+
+def find_replace(search_dict, field_value, replace=None):
+    """
+    Takes a dict with nested lists and dicts,
+    and searches all dicts for a value of the field
+    provided, replacing if desired.
+    """
+    fields_found = []
+
+    for key, value in search_dict.items():
+
+        if value == field_value:
+            fields_found.append(value)
+            if replace:
+                search_dict[key] = replace
+
+        elif isinstance(value, dict):
+            results = find_replace(value, field_value, replace)
+            for result in results:
+                fields_found.append(result)
+
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    more_results = find_replace(item, field_value, replace)
+                    for another_result in more_results:
+                        fields_found.append(another_result)
+
+    return fields_found
