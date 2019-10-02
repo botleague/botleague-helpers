@@ -1,9 +1,10 @@
 import inspect
 import os
+import sys
 
 import github
 from botleague_helpers import VERSION
-from botleague_helpers.crypto import decrypt_symmetric
+from botleague_helpers.crypto import decrypt_symmetric, decrypt_db_key
 
 
 class Config:
@@ -12,9 +13,11 @@ class Config:
         'SHOULD_USE_FIRESTORE', 'true') == 'true'
     is_test = 'IS_TEST' in os.environ
     should_gen_key = 'should_gen_leaderboard'
-    token_name = 'LEADERBOARD_GITHUB_TOKEN_encrypted'
+    token_name = 'LEADERBOARD_GITHUB_TOKEN'
+    disable_cloud_log_sinks = 'DISABLE_CLOUD_LOGGING' in os.environ
     botleague_collection_name = 'botleague'
     version = VERSION
+    python_script_name = sys.argv[0].split('/')[-1]
 
     # Properties that will change during tests
     # --------------------------------------------------------------------------
@@ -44,10 +47,7 @@ class Config:
             # We're not in a test and have not set the token, fetch from
             # Firestore
             self.ensure_firebase_initialized()
-            from firebase_admin import firestore
-            secrets = firestore.client().collection('secrets')
-            ret = decrypt_symmetric(secrets.document(self.token_name).get().
-                                    to_dict()['token'])
+            ret = decrypt_db_key(self.token_name)
         else:
             # We're not in a test and have already set the token
             ret = self._github_token
@@ -78,15 +78,17 @@ def get_test_name_from_callstack() -> str:
             return test_name
     return ret
 
+blconfig = Config()
 
-in_test = get_test_name_from_callstack
+
+def in_test() -> bool:
+    ret = (get_test_name_from_callstack() or
+           blconfig.is_test or
+           blconfig.python_script_name == 'run_tests.py')
+    return ret
 
 if 'GITHUB_DEBUG' in os.environ:
     github.enable_console_debug_logging()
-
-
-blconfig = Config()
-
 
 def activate_test_mode():
     blconfig.is_test = True

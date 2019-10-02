@@ -1,12 +1,10 @@
 import time
 from collections import defaultdict
 
-from botleague_helpers.config import in_test
+from botleague_helpers.config import in_test, blconfig
 from botleague_helpers.crypto import decrypt_db_key
 from google.cloud import logging as gcloud_logging
 import slack
-
-stackdriver_client = gcloud_logging.Client()
 
 """
 Usage:
@@ -53,13 +51,17 @@ LOGURU severities
 
 VALID_STACK_DRIVER_LEVELS = ['DEFAULT', 'DEBUG', 'INFO', 'NOTICE', 'WARNING',
                              'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY']
-
+stackdriver_client = None
 
 def add_stackdriver_sink(loguru_logger, log_name):
     """Google cloud log sink in "Global" i.e.
     https://console.cloud.google.com/logs/viewer?project=silken-impulse-217423&minLogLevel=0&expandAll=false&resource=global
     """
-    stackdriver_logger = stackdriver_client.logger(log_name)
+    global stackdriver_client
+    if not in_test() and stackdriver_client is None and \
+            not blconfig.disable_cloud_log_sinks:
+        stackdriver_client = gcloud_logging.Client()
+        stackdriver_logger = stackdriver_client.logger(log_name)
 
     def sink(message):
         record = message.record
@@ -75,7 +77,8 @@ def add_stackdriver_sink(loguru_logger, log_name):
             severity = level
         else:
             severity = 'INFO'
-        stackdriver_logger.log_text(message, severity=severity)
+        if not in_test():
+            stackdriver_logger.log_text(message, severity=severity)
 
     loguru_logger.add(sink)
 
@@ -85,6 +88,10 @@ class SlackMsgHash:
     count: int = 0
 
 def add_slack_error_sink(loguru_logger, channel):
+    if in_test() or blconfig.disable_cloud_log_sinks:
+        loguru_logger.info('Not adding slack notifier')
+        return
+
     client = slack.WebClient(token=decrypt_db_key('SLACK_ERROR_BOT_TOKEN'))
 
     msg_hashes = defaultdict(SlackMsgHash)
@@ -94,8 +101,6 @@ def add_slack_error_sink(loguru_logger, channel):
         level = str(message.record['level'])
 
         def send_message():
-            if in_test():
-                return
             message_plus_count = f'{message}.\n' \
                 f'Message duplicates in this process ' \
                 f'{msg_hashes[msg_hash].count}'
