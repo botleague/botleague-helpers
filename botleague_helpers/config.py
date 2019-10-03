@@ -84,7 +84,8 @@ blconfig = Config()
 def in_test() -> bool:
     ret = (get_test_name_from_callstack() or
            blconfig.is_test or
-           blconfig.python_script_name == 'run_tests.py')
+           blconfig.python_script_name in
+            ['run_tests.py', 'tests.py', 'test.py'])
     return ret
 
 if 'GITHUB_DEBUG' in os.environ:
