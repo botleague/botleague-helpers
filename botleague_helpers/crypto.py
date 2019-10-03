@@ -28,7 +28,13 @@ def decrypt_db_key(key, db=None):
     if isinstance(encrypted_value, Box):
         if 'token' in encrypted_value:
             encrypted_value = encrypted_value.token
-    ret = decrypt_symmetric(encrypted_value)
+            ret = decrypt_symmetric(encrypted_value)
+        else:
+            ret = Box()
+            for k, v in encrypted_value.items():
+                ret[k] = decrypt_symmetric(v)
+    else:
+        ret = decrypt_symmetric(encrypted_value)
     return ret
 
 
