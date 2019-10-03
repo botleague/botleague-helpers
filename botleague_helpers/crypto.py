@@ -78,11 +78,18 @@ def decrypt_symmetric(ciphertext, project_id='silken-impulse-217423',
 
 def main():
     if '--decrypt' in sys.argv:
-        name = sys.argv[-1]
+        if len(sys.argv) > 2:
+            name = sys.argv[-1]
+        else:
+            name = input('Secret name? ')
         print(decrypt_db_key(name))
     elif '--encrypt' in sys.argv:
-        name = sys.argv[-2]
-        value = sys.argv[-1]
+        if len(sys.argv) > 2:
+            name = sys.argv[-2]
+            value = sys.argv[-1]
+        else:
+            name = input('Secret name? ')
+            value= input('Secret value? ')
         encrypt_db_key(value, name)
 
 
