@@ -54,7 +54,6 @@ def encrypt_symmetric(plaintext, project_id='silken-impulse-217423',
 
     # Use the KMS API to encrypt the data.
     response = client.encrypt(name, plaintext.encode())
-    print(response.ciphertext)
     return response.ciphertext
 
 
