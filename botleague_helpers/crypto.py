@@ -8,7 +8,7 @@ DEFAULT_DB_NAME = 'secrets'
 
 def encrypt_db_key(unencrypted_value, key, db=None):
     from botleague_helpers.db import get_db
-    db = db or get_db(DEFAULT_DB_NAME)
+    db = db or get_db(DEFAULT_DB_NAME, force_firestore_db=True)
     key = f'{key}{POSTFIX}'
     if isinstance(unencrypted_value, dict):
         encrypted_value = dict()
@@ -21,7 +21,7 @@ def encrypt_db_key(unencrypted_value, key, db=None):
 
 def decrypt_db_key(key, db=None):
     from botleague_helpers.db import get_db
-    db = db or get_db(DEFAULT_DB_NAME)
+    db = db or get_db(DEFAULT_DB_NAME, force_firestore_db=True)
     if not key.endswith(POSTFIX):
         key = f'{key}{POSTFIX}'
     encrypted_value = db.get(key)
