@@ -33,8 +33,10 @@ def test_reduce():
     reduce.create_reduce(test_id, db=db)
     a = True
     b = False
+
     def ready_fn():
         return a and b
+
     def reduce_fn():
         return 'asdf'
 
@@ -51,7 +53,7 @@ def test_reduce():
     db.set(test_id, reduce.WAITING)
     b = True
     result = reduce.try_reduce_async(test_id, ready_fn, reduce_fn, db, max_attempts=1)
-    assert result.reduce_result == 'asdf'
+    assert result == 'asdf'
     assert db.get(test_id) == reduce.FINISHED
 
     # Don't allow double reduce

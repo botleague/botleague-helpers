@@ -72,7 +72,7 @@ def try_reduce_async(reduce_id: str, ready_fn: callable, reduce_fn: callable,
         if ready_fn():
             ret = reduce_fn()
             db.set(reduce_id, FINISHED)
-            return Box(reduce_result=ret)
+            return ret
         else:
             # Not ready, don't reduce
             db.set(reduce_id, WAITING)
