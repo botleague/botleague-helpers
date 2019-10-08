@@ -119,8 +119,8 @@ def is_json(string: str):
     return True
 
 
-def box2json(box: Box):
-    return box.to_json(indent=2, default=str)
+def box2json(box: Union[Box, BoxList]):
+    return box.to_json(indent=2, default=str, sort_keys=True)
 
 
 def find_replace(search_dict, field_value, replace=None):

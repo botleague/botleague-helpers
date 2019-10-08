@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import time
 
@@ -11,6 +11,8 @@ from github import Github
 from retry import retry
 from github import UnknownObjectException
 from loguru import logger as log
+
+from botleague_helpers.utils import box2json
 
 DEFAULT_BOTLEAGUE_LIAISON_HOST = 'https://liaison.botleague.io'
 BOTLEAGUE_LIAISON_HOST = os.environ.get('BOTLEAGUE_LIAISON_HOST') or \
@@ -96,11 +98,11 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
     problem_cis = wait_for_problem_cis(problem_cis)
     if all(p.status == 'passed' for p in problem_cis):
         log.success(f'Problem ci\'s passed! Problem cis were: '
-                 f'{problem_cis.to_json(indent=2, default=str)}')
+                 f'{box2json(problem_cis)}')
         return True
     else:
         raise RuntimeError(f'Problem ci\'s failed! Problem cis were: '
-                 f'{problem_cis.to_json(indent=2, default=str)}')
+                 f'{box2json(problem_cis)}')
 
 
 def set_pull_body(pull, sim_url=None):
@@ -145,15 +147,15 @@ def wait_for_build_result(job_id) -> Tuple[bool, Box]:
     job = wait_for_job_to_finish(job_id)
     if job.results.errors:
         log.error(f'Build finished with errors. Job details:\n'
-                  f'{job.to_json(indent=2, default=str)}')
+                  f'{box2json(job)}')
         ret = False
     else:
         log.success(f'Build finished successfully. Job details:\n'
-                    f'{job.to_json(indent=2, default=str)}')
+                    f'{box2json(job)}')
         ret = True
     if job.results.logs:
         log.info(f'Full job logs: '
-                 f'{job.results.logs.to_json(indent=2, default=str)}')
+                 f'{box2json(job.results.logs)}')
 
     return ret, job
 
@@ -263,10 +265,6 @@ def get_head_commit(full_repo_name: str, token: str, branch: str = 'master'):
         headers=headers)
     ret = resp.json()['object']['sha']
     return ret
-
-
-def box2json(box: Box):
-    return box.to_json(indent=2, default=str)
 
 
 def play():

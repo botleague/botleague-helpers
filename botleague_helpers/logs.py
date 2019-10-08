@@ -1,9 +1,12 @@
 import time
 from collections import defaultdict
+from copy import copy
 
+from google.cloud import logging as gcloud_logging
 from botleague_helpers.config import in_test, blconfig
 from botleague_helpers.crypto import decrypt_db_key
-from google.cloud import logging as gcloud_logging
+from botleague_helpers import utils
+
 import slack
 
 """
