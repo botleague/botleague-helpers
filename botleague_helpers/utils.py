@@ -1,12 +1,14 @@
 import json
 import os
 import os.path as p
+import sys
+from subprocess import PIPE, Popen
+from typing import Union
 
+import requests
 from botleague_helpers.config import blconfig
-from botleague_helpers.db import DB, get_db
-from box import Box
-
-import constants as c
+from botleague_helpers.db import get_db
+from box import Box, BoxList
 
 from loguru import logger as log
 
@@ -151,3 +153,64 @@ def find_replace(search_dict, field_value, replace=None):
                         fields_found.append(another_result)
 
     return fields_found
+
+
+def get_upload_to_jist_fn():
+    # TODO: Move these to constants, but make gist uploading deepdrive agnostic
+    AWS_BUCKET = 'deepdrive'
+    AWS_BUCKET_URL = 'https://s3-us-west-1.amazonaws.com/' + AWS_BUCKET
+    YOU_GET_MY_JIST_URL = AWS_BUCKET_URL + '/yougetmyjist.json'
+    closure = Box()
+    closure.you_get_my_jist = None
+
+    def do_it(name: str, content: str, public: bool):
+        files = [f'/tmp/slack-message-tmp-{generate_rand_alphanumeric(9)}']
+        with open(files[0], 'w') as tmp_file:
+            tmp_file.write(content)
+
+        gist_env = os.environ.copy()
+        if not closure.you_get_my_jist:
+            # Lazy load
+            closure.you_get_my_jist = \
+                requests.get(YOU_GET_MY_JIST_URL).text.strip()
+
+        gist_env['YOU_GET_MY_JIST'] = closure.you_get_my_jist
+        if os.path.dirname(sys.executable) not in os.environ['PATH']:
+            gist_env['PATH'] = os.path.dirname(sys.executable) + ':' + gist_env['PATH']
+        opts = '--public' if public else ''
+        cmd = 'gist {opts} create {gist_name} {files}'
+        filelist = ' '.join('"%s"' % f for f in files)
+        cmd = cmd.format(gist_name=name, files=filelist, opts=opts)
+        output, ret_code = run_command(cmd, env=gist_env, verbose=True)
+        if ret_code != 0:
+            log.warn('Could not upload gist. \n%s' % (output,))
+        url = output if ret_code == 0 else None
+        os.remove(files[0])
+        return url
+    return do_it
+
+upload_to_gist = get_upload_to_jist_fn()
+
+
+def run_command(cmd, cwd=None, env=None, throw=True, verbose=False, print_errors=True):
+    def say(*args):
+        if verbose:
+            print(*args)
+    say(cmd)
+    if not isinstance(cmd, list):
+        cmd = cmd.split()
+    process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd, env=env)
+    result, err = process.communicate()
+    if not isinstance(result, str):
+        result = ''.join(map(chr, result))
+    result = result.strip()
+    say(result)
+    if process.returncode != 0:
+        if not isinstance(err, str):
+            err = ''.join(map(chr, err))
+        err_msg = ' '.join(cmd) + ' finished with error ' + err.strip()
+        if throw:
+            raise RuntimeError(err_msg)
+        elif print_errors:
+            print(err_msg)
+    return result, process.returncode

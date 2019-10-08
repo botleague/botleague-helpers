@@ -104,7 +104,16 @@ def add_slack_error_sink(loguru_logger, channel):
         level = str(message.record['level'])
 
         def send_message():
-            message_plus_count = f'{message}.\n' \
+            # Basic data types in closure are immutable
+            msg_copy = copy(message)
+            if len(msg_copy) > 1000:
+                gist_url = utils.upload_to_gist(
+                    name=message.record['time'], content=msg_copy, public=False)
+                msg_copy = f'```{msg_copy[:500]}\n...\n{msg_copy[-500:]}```' \
+                    f'\nFull message: {gist_url}'
+            else:
+                msg_copy = f'```{msg_copy}```'
+            message_plus_count = f'{msg_copy}\n' \
                 f'Message duplicates in this process ' \
                 f'{msg_hashes[msg_hash].count}'
             response = client.chat_postMessage(channel=channel,
@@ -126,3 +135,19 @@ def add_slack_error_sink(loguru_logger, channel):
             msg_hashes[msg_hash].count += 1
 
     loguru_logger.add(sink)
+
+
+def sanity():
+    from loguru import logger as log
+    add_slack_error_sink(log, '#deepdrive-alerts')
+    try:
+        raise RuntimeError('yay')
+    except:
+        from utils import generate_rand_alphanumeric
+        long_message = '\n'.join(
+            [generate_rand_alphanumeric(100) for _ in range(1750)])
+        log.exception(f'Caught! rand: {long_message}')
+        log.exception(f'Caught! rand2: {long_message}')
+
+if __name__ == '__main__':
+    sanity()
