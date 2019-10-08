@@ -141,6 +141,7 @@ def wait_for_fn(fn: callable):
 
 
 def wait_for_build_result(job_id) -> Tuple[bool, Box]:
+    log.info(f'Waiting for build job: {job_id} to complete...')
     job = wait_for_job_to_finish(job_id)
     if job.results.errors:
         log.error(f'Build finished with errors. Job details:\n'
@@ -158,7 +159,6 @@ def wait_for_build_result(job_id) -> Tuple[bool, Box]:
 
 def wait_for_job_to_finish(job_id) -> Box:
     last_log_time = None
-    log.info(f'Waiting for sim build {job_id} to complete...')
     while True:
         status_resp = get_job_status(job_id)
         job_status = dbox(status_resp.json())
