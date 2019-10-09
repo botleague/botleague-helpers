@@ -39,7 +39,7 @@ setup(
     long_description_content_type='text/markdown',
     classifiers=[
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
         'Environment :: Console'
     ],
     keywords='botleague',
@@ -49,7 +49,7 @@ setup(
     license='MIT',
     packages=['botleague_helpers'],
     zip_safe=True,
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     install_requires=requires,
     dependency_links=dependency_links,
 )
