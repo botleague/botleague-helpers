@@ -101,8 +101,10 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
                  f'{box2json(problem_cis)}')
         return True
     else:
+        url_prefix = 'https://github.com/botleague/botleague/pull/'
+        ci_urls = '\n'.join([f'{url_prefix}{p.pr_number}' for p in problem_cis])
         raise RuntimeError(f'Problem ci\'s failed! Problem cis were: '
-                 f'{box2json(problem_cis)}')
+                 f'{box2json(problem_cis)}. Check PRs for errors {ci_urls}')
 
 
 def set_pull_body(pull, sim_url=None):
