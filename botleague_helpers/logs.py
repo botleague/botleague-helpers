@@ -90,7 +90,7 @@ class SlackMsgHash:
     last_notified: float = None
     count: int = 0
 
-def add_slack_error_sink(loguru_logger, channel):
+def add_slack_error_sink(loguru_logger, channel: str, log_name: str = ''):
     if in_test() or blconfig.disable_cloud_log_sinks:
         loguru_logger.info('Not adding slack notifier')
         return
@@ -116,8 +116,10 @@ def add_slack_error_sink(loguru_logger, channel):
             message_plus_count = f'{msg_copy}\n' \
                 f'Message duplicates in this process ' \
                 f'{msg_hashes[msg_hash].count}'
+            if log_name:
+                message_plus_count = f'*{log_name}*\n{message_plus_count}'
             response = client.chat_postMessage(channel=channel,
-                                               text=message_plus_count)
+                                               text=message_plus_count,)
             msg_hashes[msg_hash].last_notified = time.time()
             # assert response["ok"]
             # assert response["message"]["text"] == message
@@ -139,7 +141,7 @@ def add_slack_error_sink(loguru_logger, channel):
 
 def sanity():
     from loguru import logger as log
-    add_slack_error_sink(log, '#deepdrive-alerts')
+    add_slack_error_sink(log, '#deepdrive-alerts', 'sanity')
     try:
         raise RuntimeError('yay')
     except:
