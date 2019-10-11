@@ -39,8 +39,8 @@ def build_and_run_botleague_ci(build_url, run_botleague_ci_wrapper_fn):
 
 @log.catch(reraise=True)
 def run_botleague_ci(branch, version, set_version_fn, pr_message,
-                     supported_problems,
-                     sim_url=None) -> bool:
+                     supported_problems, sim_url=None,
+                     container_postfix=None) -> bool:
     # Send pull request to Botleague
     log.info('Sending pull requests to botleague for supported problems')
     github_token = os.environ['BOTLEAGUE_GITHUB_TOKEN']
@@ -82,7 +82,7 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
             head=f'{botleague_fork_owner}:{botleague_branch_name}',
             base='master',)
 
-        set_pull_body(pull, sim_url)
+        set_pull_body(pull, sim_url, container_postfix)
 
         # if branch not in ['master']:  # Change to this after v3 is merged.
         if branch not in ['master', 'v3']:
@@ -107,7 +107,7 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
                  f'{box2json(problem_cis)}. Check PRs for errors {ci_urls}')
 
 
-def set_pull_body(pull, sim_url=None):
+def set_pull_body(pull, sim_url=None, container_postfix=None):
     pull.body = Box()
     if sim_url:
         pull.body.replace_sim_url = sim_url
