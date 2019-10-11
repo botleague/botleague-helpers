@@ -139,7 +139,7 @@ def add_slack_error_sink(loguru_logger, channel: str, log_name: str = ''):
     loguru_logger.add(sink)
 
 
-def sanity():
+def sanity(x):
     from loguru import logger as log
     add_slack_error_sink(log, '#deepdrive-alerts', 'sanity')
     try:
@@ -152,4 +152,4 @@ def sanity():
         log.exception(f'Caught! rand2: {long_message}')
 
 if __name__ == '__main__':
-    sanity()
+    sanity(123)
