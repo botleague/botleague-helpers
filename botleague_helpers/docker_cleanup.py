@@ -4,7 +4,7 @@ import dateutil.parser
 import datetime
 import requests
 from loguru import logger as log
-from utils import on_gce
+from botleague_helpers.utils import on_gce
 
 
 def remove_old(weeks=4):
