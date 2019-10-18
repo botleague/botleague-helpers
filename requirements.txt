@@ -13,4 +13,6 @@ google-cloud-kms
 slackclient
 requests
 retry
+psutil
+python-dateutil
 git+git://github.com/deepdrive/gist.git#egg=python-gist==0.6.1.dev42
