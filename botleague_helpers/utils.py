@@ -214,3 +214,20 @@ def run_command(cmd, cwd=None, env=None, throw=True, verbose=False, print_errors
         elif print_errors:
             print(err_msg)
     return result, process.returncode
+
+
+def on_gce():
+   meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance'
+   id_url = f'{meta_url}/id'
+   try:
+       if requests.get(id_url, headers={'Metadata-Flavor': 'Google'}).ok:
+           return True
+   except requests.ConnectionError as e:
+       return False
+   return False
+
+
+if __name__ == '__main__':
+    on_gce()
+
+
