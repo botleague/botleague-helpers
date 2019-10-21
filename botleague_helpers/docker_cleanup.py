@@ -41,12 +41,14 @@ def remove_old(weeks=4):
 
     dkr.api.prune_containers(filters=dict(until=until))
     dkr.api.prune_images()
+    check_disk_usage()
+
+
+def check_disk_usage():
     disk_usage = psutil.disk_usage('/')
-    if disk_usage.percent > 90 or disk_usage.remaining < 50e9:
+    if disk_usage.percent > 90 or disk_usage.free < 50e9:
         log.error(f'Low disk space {disk_usage}')
 
 
-
-
 if __name__ == '__main__':
-    remove_old()
+    check_disk_usage()
