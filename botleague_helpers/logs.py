@@ -2,10 +2,12 @@ import time
 from collections import defaultdict
 from copy import copy
 
+
 from google.cloud import logging as gcloud_logging
 from botleague_helpers.config import in_test, blconfig
 from botleague_helpers.crypto import decrypt_db_key
 from botleague_helpers import utils
+from botleague_helpers import upload
 
 import slack
 
@@ -107,10 +109,7 @@ def add_slack_error_sink(loguru_logger, channel: str, log_name: str = ''):
             # Basic data types in closure are immutable
             msg_copy = copy(message)
             if len(msg_copy) > 1000:
-                gist_url = utils.upload_to_gist(
-                    name=message.record['time'], content=msg_copy, public=False)
-                msg_copy = f'```{msg_copy[:500]}\n...\n{msg_copy[-500:]}```' \
-                    f'\nFull message: {gist_url}'
+                msg_copy = upload_to_gcs(msg_copy)
             else:
                 msg_copy = f'```{msg_copy}```'
             message_plus_count = f'{msg_copy}\n' \
@@ -123,6 +122,18 @@ def add_slack_error_sink(loguru_logger, channel: str, log_name: str = ''):
             msg_hashes[msg_hash].last_notified = time.time()
             # assert response["ok"]
             # assert response["message"]["text"] == message
+
+        def upload_to_gcs(msg_copy):
+            log_time = message.record['time'].isoformat().replace(':', '')
+            rando = utils.generate_rand_alphanumeric(10)
+            log_url = upload.upload_str(
+                name=f'{log_time}_{rando}.txt',
+                content=msg_copy,
+                bucket_name='deepdrive-alert-logs')
+            # Truncate message for slack
+            msg_copy = f'```{msg_copy[:500]}\n...\n{msg_copy[-500:]}```' \
+                f'\nFull message: {log_url}'
+            return msg_copy
 
         if level in ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY']:
             text = message.record['message']
