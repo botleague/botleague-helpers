@@ -227,7 +227,15 @@ def on_gce():
    return False
 
 
+def ensure_nvidia_docker_runtime():
+    import docker
+    dkr = docker.from_env()
+    if 'nvidia' not in dkr.api.info()['Runtimes']:
+        # TODO service docker restart
+        pass
+
+
 if __name__ == '__main__':
-    on_gce()
+    ensure_nvidia_docker_runtime()
 
 
