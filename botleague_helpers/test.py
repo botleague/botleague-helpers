@@ -2,6 +2,7 @@ import random
 import string
 import sys
 
+from box import Box
 from loguru import logger as log
 
 from botleague_helpers.db import get_db
@@ -10,12 +11,18 @@ from botleague_helpers import reduce
 TEST_DB_NAME = 'test_db_delete_me'
 
 
-def test_compare_and_set_live_db():
+def test_compare_and_swap_live_db():
     db = get_db(TEST_DB_NAME, force_firestore_db=True)
     db.set('yo', 1)
     should_be_false = db.compare_and_swap('yo', 2, 2)
     assert should_be_false is False
     assert db.get('yo') == 1
+
+    x = db.get('doesnotexist')
+    y = Box(a=1)
+    should_be_true = db.compare_and_swap('doesnotexist', x, y)
+    assert should_be_true
+    assert db.get('doesnotexist') == y
     db.delete_all_test_data()
 
 

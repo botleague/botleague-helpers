@@ -145,7 +145,7 @@ class DBFirestore(DB):
             entire transaction again. In this case the expected value will
             be different and set() will not be called, thus returning False.
             """
-            snapshot = ref_.get(transaction=transaction_).to_dict()
+            snapshot = ref_.get(transaction=transaction_).to_dict() or {}
             snapshot = self._simplify_value(key, snapshot)
             if snapshot == expected_current_value_:
                 transaction_.set(ref_, self._expand_value(key, new_value_))
