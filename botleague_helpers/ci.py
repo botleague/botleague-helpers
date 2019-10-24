@@ -85,7 +85,7 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
         set_pull_body(pull, sim_url, container_postfix)
 
         # if branch not in ['master']:  # Change to this after v3 is merged.
-        if branch not in ['master', 'v3']:
+        if branch not in ['master', 'v3', 'v2-security-updates']:
             pull.draft = True
 
         pull_resp = create_pull_request(
