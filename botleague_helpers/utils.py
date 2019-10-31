@@ -220,7 +220,7 @@ def gce_instance_id():
    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance'
    id_url = f'{meta_url}/id'
    try:
-       resp = requests.get(id_url, headers={'Metadata-Flavor': 'Google'}).ok
+       resp = requests.get(id_url, headers={'Metadata-Flavor': 'Google'})
        if resp.ok:
            return resp.text
    except requests.ConnectionError:
