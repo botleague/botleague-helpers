@@ -216,15 +216,16 @@ def run_command(cmd, cwd=None, env=None, throw=True, verbose=False, print_errors
     return result, process.returncode
 
 
-def on_gce():
+def gce_instance_id():
    meta_url = 'http://metadata.google.internal/computeMetadata/v1/instance'
    id_url = f'{meta_url}/id'
    try:
-       if requests.get(id_url, headers={'Metadata-Flavor': 'Google'}).ok:
-           return True
-   except requests.ConnectionError as e:
-       return False
-   return False
+       resp = requests.get(id_url, headers={'Metadata-Flavor': 'Google'}).ok
+       if resp.ok:
+           return resp.text
+   except requests.ConnectionError:
+       pass
+   return None
 
 
 def ensure_nvidia_docker_runtime():

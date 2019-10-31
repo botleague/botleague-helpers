@@ -14,5 +14,6 @@ slackclient
 requests
 retry
 psutil
+docker
 python-dateutil
 git+git://github.com/deepdrive/gist.git#egg=python-gist==0.6.1.dev42
