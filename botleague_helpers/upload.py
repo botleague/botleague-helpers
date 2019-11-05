@@ -1,3 +1,6 @@
+import os
+import zipfile
+
 from google.cloud import storage
 from loguru import logger as log
 
