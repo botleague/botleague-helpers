@@ -13,6 +13,7 @@ from github import UnknownObjectException
 from loguru import logger as log
 
 from botleague_helpers.utils import box2json
+from botleague_helpers.config import blconfig
 
 DEFAULT_BOTLEAGUE_LIAISON_HOST = 'https://liaison.botleague.io'
 BOTLEAGUE_LIAISON_HOST = os.environ.get('BOTLEAGUE_LIAISON_HOST') or \
@@ -85,7 +86,7 @@ def run_botleague_ci(branch, version, set_version_fn, pr_message,
         set_pull_body(pull, sim_url, container_postfix)
 
         # if branch not in ['master']:  # Change to this after v3 is merged.
-        if branch not in ['master', 'v3', 'v2-security-updates']:
+        if branch not in blconfig.release_branches:
             pull.draft = True
 
         pull_resp = create_pull_request(
