@@ -2,6 +2,8 @@ import json
 import os
 import os.path as p
 import sys
+
+from db import get_db
 from subprocess import PIPE, Popen
 from typing import Union
 
@@ -236,7 +238,27 @@ def ensure_nvidia_docker_runtime():
         pass
 
 
+def get_bot_scores_id_from_parts(problem_id, username, botname):
+    """
+    :return: e.g. 'crizcraig#goodbot-on-deepdrive#unprotected_left'
+    """
+
+    # Forward slashes not allowed on firestore
+    # https://stackoverflow.com/a/54918283/134077
+    problem_id = problem_id.replace('/', '#')
+
+    ret = f'{username}#{botname}-on-{problem_id}'
+    return ret
+
+
+def get_bot_scores_db():
+    return get_db('botleague_liaison_bot_scores')
+
+
+def get_eval_db_key(eval_key):
+    # Prefix since we are going into our GCP app's global datastore
+    return '%s_%s' % ('botleague_eval', eval_key)
+
+
 if __name__ == '__main__':
     ensure_nvidia_docker_runtime()
-
-
