@@ -3,7 +3,6 @@ import os
 import os.path as p
 import sys
 
-from db import get_db
 from subprocess import PIPE, Popen
 from typing import Union
 
