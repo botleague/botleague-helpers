@@ -17,7 +17,7 @@ class Config:
     disable_cloud_log_sinks = 'DISABLE_CLOUD_LOGGING' in os.environ
     botleague_collection_name = 'botleague'
     version = VERSION
-    release_branches = ['master', 'v3', 'v2-security-updates']
+    release_branches = ['master']
     python_script_name = sys.argv[0].split('/')[-1]
 
     # Properties that will change during tests
