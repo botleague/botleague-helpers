@@ -1,3 +1,5 @@
+import os
+
 import time
 from collections import defaultdict
 from copy import copy
@@ -93,7 +95,8 @@ class SlackMsgHash:
     count: int = 0
 
 def add_slack_error_sink(loguru_logger, channel: str, log_name: str = ''):
-    if in_test() or blconfig.disable_cloud_log_sinks:
+    if 'TEST_ALERTS' not in os.environ and (in_test() or
+                                            blconfig.disable_cloud_log_sinks):
         loguru_logger.info('Not adding slack notifier')
         return
 
